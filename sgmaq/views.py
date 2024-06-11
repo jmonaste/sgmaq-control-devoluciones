@@ -29,6 +29,7 @@ from .forms import TaskUploadImage
 from .forms import PostImageForm
 from .forms import TaskDeliveryClientForm
 from .forms import TaskFormRechazoManager
+from .forms import TaskFormRechazoCliente
 
 from datetime import datetime
 import pandas as pd
@@ -432,8 +433,96 @@ def task_detail(request, task_id):
             'imageForm': imageForm
         })
 
+@login_required
+@allowed_user(allowed_roles=['admin', 'manager'])
+def task_manager_client_pending(request):
+    # fecha de compeltada, y manager rellena, cliente vacía
+    tasks = Task.objects.filter(datecompleted__isnull=False, datecompleted_manager_approval__isnull=False, datecompleted_client_approval__isnull=True)
 
+    return render(request, 'tasks/task_manager_client_pending.html', {
+        'tasks': tasks
+    })
 
+@login_required
+@allowed_user(allowed_roles=['admin', 'manager'])
+def tasks_history(request):
+    tasks = Task.objects.all() # todas las tareas
+    return render(request, 'tasks/tasks_history.html', {
+        'tasks': tasks
+    })
+
+@login_required
+@allowed_user(allowed_roles=['customer'])
+def task_client_pending(request):
+    # Mostrar todas las tareas entregadas por employee, independientemente del usuario
+    tasks = Task.objects.filter(datecompleted__isnull=False, datecompleted_manager_approval__isnull=False, datecompleted_client_approval__isnull=True).order_by('-datecompleted')
+    return render(request, 'tasks/task_client_pending.html', {
+        'tasks': tasks
+    })
+
+@login_required
+@allowed_user(allowed_roles=['customer'])
+def task_client_approval(request, task_id):
+    task = get_object_or_404(Task, pk=task_id)
+
+    if request.method == 'POST':
+        try:
+
+            form = TaskDeliveryClientForm(request.POST)
+            if form.is_valid():
+                task.datecompleted_client_approval = timezone.now()
+                task.save()
+
+                # Create changelog entry
+                ChangeLog.objects.create(
+                    task_id=task_id,
+                    dateofchange = timezone.now(),
+                    user_id=request.user.id,
+                    descripcion_estado = "Tarea Aprobada por cliente",
+                    changereason= "Tarea Aprobada por cliente",
+                    comment="Entrada automática",
+            
+                )                
+                
+            return redirect('task_client_pending')
+        except ValueError:
+                return redirect('task_client_pending')
+
+@login_required
+@allowed_user(allowed_roles=['customer'])
+def task_client_denial(request, task_id):
+    task = get_object_or_404(Task, pk=task_id)
+
+    if request.method == 'GET':
+        return render(request, 'tasks/task_client_denial.html', {
+            'task': task,
+            'form': TaskFormRechazoCliente
+        })
+    else:
+        try:
+            form = TaskFormRechazoCliente(request.POST)
+            if form.is_valid():
+                task.datecompleted = None
+                task.datecompleted_manager_approval = None
+                task.datecompleted_client_approval = None
+                task.motivo_rechazo_cliente = form.cleaned_data['motivo_rechazo_cliente']
+                task.comentario_rechazo_cliente = form.cleaned_data['comentario_rechazo_cliente']
+                task.flag_rechazado = True
+                task.save()
+
+                # Create changelog entry
+                ChangeLog.objects.create(
+                    task_id=task_id,
+                    dateofchange = timezone.now(),
+                    user_id=request.user.id,
+                    descripcion_estado = "Tarea Rechazada por cliente",
+                    changereason= MotivoRechazo.objects.get(codigo=task.motivo_rechazo_cliente).descripcion,
+                    comment=task.comentario_rechazo_cliente,
+                )
+
+            return redirect('task_client_pending')
+        except ValueError:
+            return redirect('task_client_pending')
 
 
 

@@ -53,8 +53,8 @@
                                 <li><a class="dropdown-item" href="{% url 'upload_file' %}">Cargar trabajos</a></li>
                             <li><a class="dropdown-item" href="{% url 'tasks' %}">Vehículos pendientes de lavar</a></li>
                             <li><a class="dropdown-item" href="{% url 'task_manager_pending' %}">Vehículos pendientes de entregar a cliente</a></li>
-                            <li><a class="dropdown-item" href="{% url 'index' %}">Vehículos entregados a cliente pendientes de aceptación</a></li>
-                            <li><a class="dropdown-item" href="{% url 'index' %}">Vehículos histórico</a></li>
+                            <li><a class="dropdown-item" href="{% url 'task_manager_client_pending' %}">Vehículos entregados a cliente pendientes de aceptación</a></li>
+                            <li><a class="dropdown-item" href="{% url 'tasks_history' %}">Vehículos histórico</a></li>
                             </ul>
                         </li>             
                         
@@ -82,7 +82,7 @@
                     <!-- Sólo el perfil del cliente-->
                     {% if request.user|has_group:"customer" %} 
                         <li class="nav-item">
-                            <a href="{% url 'index' %}" class="nav-link">Aceptación de vehículos</a>
+                            <a href="{% url 'task_client_pending' %}" class="nav-link">Aceptación de vehículos</a>
                         </li>
                     {% endif %}
 

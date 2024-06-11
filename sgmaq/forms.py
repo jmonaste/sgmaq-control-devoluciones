@@ -39,3 +39,8 @@ class TaskFormRechazoManager(forms.ModelForm):
     class Meta:
         model = Task
         fields = ['motivo_rechazo_manager', 'comentario_rechazo_manager']
+
+class TaskFormRechazoCliente(forms.ModelForm):
+    class Meta:
+        model = Task
+        fields = ['motivo_rechazo_cliente', 'comentario_rechazo_cliente']

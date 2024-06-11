@@ -15,6 +15,7 @@ urlpatterns = [
     path('tasks/', views.tasks, name="tasks"),
     path('tasks/task_search', views.task_search, name="task_search"),
     path('task_detail/<int:task_id>', views.task_detail, name="task_detail"),
+    path('tasks_history/', views.tasks_history, name="tasks_history"),
 
     path('upload/', views.upload_file, name='upload_file'),
 
@@ -25,8 +26,11 @@ urlpatterns = [
     path('task_manager_pending/', views.task_manager_pending, name="task_manager_pending"),
     path('task_manager_approval/<int:task_id>', views.task_manager_approval, name="task_manager_approval"), 
     path('task_manager_denial/<int:task_id>/', views.task_manager_denial, name="task_manager_denial"),  
+    path('task_manager_client_pending/', views.task_manager_client_pending, name="task_manager_client_pending"),  
 
-
+    path('task_client_pending/', views.task_client_pending, name="task_client_pending"),
+    path('task_client_approval/<int:task_id>/', views.task_client_approval, name="task_client_approval"),    
+    path('task_client_denial/<int:task_id>/', views.task_client_denial, name="task_client_denial"),    
 ]  
 
 

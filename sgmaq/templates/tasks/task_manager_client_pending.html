@@ -1,0 +1,53 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+
+<h1>Pendientes de cliente</h1>
+
+
+
+{% load project_custom_tags %}
+
+    {% if request.user|has_group:"manager" or request.user|has_group:"admin" %} 
+        <p>You are a admin/manager. You can see client pending tasks.</p>
+
+
+        <form action="{% url 'task_search' %}" method="get" class="mb-3">
+            {% csrf_token %}
+            <input type="text" name="q", placeholder="Introduzca VIN">
+            <button type="submit" class="btn btn-primary">Buscar</button>
+        </form>
+        
+        
+            <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>VIN</th>
+                    <th>Empleado responsable</th>
+                    <th>Reponsable</th>
+                    <th>Cliente</th>
+                  </tr>
+                </thead>
+                <tbody>
+
+
+                    {% for task in tasks %}
+                    <tr>
+                      <td><a href="{% url 'task_detail' task.id %}" class="card-title">{{ task.vin }}</a></td>
+                      <td>{{ task.employee_user }}</td>
+                      <td>{{ task.responsible_user }}</td>
+                      <td>{{ task.client }}</td>
+                    </tr>
+                  {% endfor %}
+
+
+                </tbody>
+              </table>
+
+
+
+
+    {% endif %}
+
+
+{% endblock %}

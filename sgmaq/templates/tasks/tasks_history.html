@@ -1,0 +1,67 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+
+<h1>Histórico</h1>
+
+
+
+{% load project_custom_tags %}
+
+    {% if request.user|has_group:"manager" or request.user|has_group:"admin" %} 
+        <p>You are a admin/manager. You can see tasks history.</p>
+
+
+        <form action="{% url 'task_search' %}" method="get" class="mb-3">
+            {% csrf_token %}
+            <input type="text" name="q", placeholder="Introduzca VIN">
+            <button type="submit" class="btn btn-primary">Buscar</button>
+        </form>
+        
+
+
+
+        <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Campaña</th>
+                <th>VIN</th>
+                <th>Empleado responsable</th>
+                <th>Reponsable</th>
+                <th>Cliente</th>
+                <th>Fecha creación</th>
+                <th>Fecha finalización</th>
+                <th>Aprobación manager</th>
+                <th>Aprobación cliente</th>
+              </tr>
+            </thead>
+            <tbody>
+
+
+                {% for task in tasks %}
+                <tr>
+                    <td>{{ task.project.name }}</td>
+                    <td><a href="{% url 'task_detail' task.id %}" class="card-title">{{ task.vin }}</a></td>
+                    <td>{{ task.employee_user }}</td>
+                    <td>{{ task.responsible_user }}</td>
+                    <td>{{ task.client }}</td>
+                    <td>{{ task.created }}</td>
+                    <td>{{ task.datecompleted }}</td>
+                    <td>{{ task.datecompleted_manager_approval }}</td>
+                    <td>{{ task.datecompleted_client_approval }}</td>
+                </tr>
+              {% endfor %}
+
+
+            </tbody>
+          </table>
+
+
+
+
+
+
+    {% endif %}
+
+
+{% endblock %}
