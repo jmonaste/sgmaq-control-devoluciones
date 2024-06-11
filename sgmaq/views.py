@@ -69,10 +69,6 @@ def signout(request):
     logout(request)
     return redirect('index')
 
-
-
-
-
 @login_required
 @allowed_user(allowed_roles=['admin', 'manager', 'employee'])
 def tasks(request):
@@ -102,7 +98,6 @@ def task_search(request):
     return render(request, 'tasks/tasks.html', {
         'tasks': tasks
     })
-
 
 @login_required
 def upload_file(request):
