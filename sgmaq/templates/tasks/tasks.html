@@ -1,0 +1,77 @@
+{% extends 'layouts/base.html' %}
+{% block content %}
+
+<h1>Vehículos pendientes</h1>
+
+{% load project_custom_tags %}
+
+    <!-- PERFILES ADMINISTRADORES Y DE GESTION -->
+    {% if request.user|has_group:"manager" or request.user|has_group:"admin" %}
+
+        <p>You are a admin/manager. You can see assigned tasks and manage employees.</p>
+        <p>Existen {{ pending_tasks_count }} tareas pendientes.</p>
+        <h5>Tareas Pendientes por Empleado</h5>
+
+        <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Tareas pendientes</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for task in pending_tasks_per_user %}
+                <tr>
+                    <td>{{ task.employee_user_id__username }}</td>
+                    <td>{{ task.total }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+
+    <!-- PERFILES DE TRABAJADOR -->      
+    {% else %}  
+
+        <p>Estás usando un usuario con perfil de trabajdor. En esta sección podrás consultar tus tareas pendientes</p>
+
+        <form action="{% url 'task_search' %}" method="get" class="mb-3">
+            {% csrf_token %}
+            <input type="text" name="q", placeholder="Introduzca VIN">
+            <button type="submit" class="btn btn-primary">Buscar</button>
+        </form>
+        
+        {% for task in tasks %}
+    
+            <div class="card mb-2">
+                <div class="card-header">
+                    Campaña: {{ task.project.name }}
+                </div>
+                <div class="card-body">
+                    <div class="row">  
+
+                        <div class="col">  
+                            {% if task.flag_rechazado %} 
+                                <a href="{% url 'task_delivery' task.id %}" class="card-link">
+                                    <h5 class="card-title">⚠ {{ task.vin }}</h5>
+                                </a>
+                            {% else %} 
+                            <a href="{% url 'task_delivery' task.id %}" class="card-link">
+                                <h5 class="card-title">{{ task.vin }}</h5>
+                            </a>
+                            {% endif %}
+                            <p class="card-text mb-1 text-sm">Deadline: {{ task.deadline }}</p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        {% endfor %}
+
+    {% endif %}
+
+
+
+    
+
+{% endblock %}

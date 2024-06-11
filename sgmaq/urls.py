@@ -10,7 +10,10 @@ urlpatterns = [
     path('about/', views.about, name="about"),
     path('signin/', views.signin, name="signin"),
     path('signup/', views.signup, name="signup"),
-    path('logout/', views.signout, name="logout")
+    path('logout/', views.signout, name="logout"),
+
+    path('tasks/', views.tasks, name="tasks"),
+    path('tasks/task_search', views.task_search, name="task_search"),
 ]  
 
 

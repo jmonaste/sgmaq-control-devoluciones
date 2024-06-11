@@ -50,11 +50,11 @@
                             Procesos
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
-                                <li><a class="dropdown-item" href="{% url 'upload_file' %}">Cargar trabajos</a></li>
-                            <li><a class="dropdown-item" href="{% url 'tasks' %}">Vehículos pendientes de lavar</a></li>
-                            <li><a class="dropdown-item" href="{% url 'task_manager_pending' %}">Vehículos pendientes de entregar a cliente</a></li>
-                            <li><a class="dropdown-item" href="{% url 'tasks_client_pending' %}">Vehículos entregados a cliente pendientes de aceptación</a></li>
-                            <li><a class="dropdown-item" href="{% url 'tasks_history' %}">Vehículos histórico</a></li>
+                                <li><a class="dropdown-item" href="{% url 'index' %}">Cargar trabajos</a></li>
+                            <li><a class="dropdown-item" href="{% url 'index' %}">Vehículos pendientes de lavar</a></li>
+                            <li><a class="dropdown-item" href="{% url 'index' %}">Vehículos pendientes de entregar a cliente</a></li>
+                            <li><a class="dropdown-item" href="{% url 'index' %}">Vehículos entregados a cliente pendientes de aceptación</a></li>
+                            <li><a class="dropdown-item" href="{% url 'index' %}">Vehículos histórico</a></li>
                             </ul>
                         </li>             
                         
@@ -63,16 +63,16 @@
                             Dashboards
                             </a>
                             <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarDarkDropdownMenuLink">
-                                <li><a class="dropdown-item" href="{% url 'dashboard' %}">Global operaciones</a></li>
-                                <li><a class="dropdown-item" href="{% url 'tasks' %}">Empleados</a></li>
-                                <li><a class="dropdown-item" href="{% url 'task_manager_pending' %}">Clientes</a></li>
-                                <li><a class="dropdown-item" href="{% url 'dashboard' %}">Rechazos</a></li>
-                                <li><a class="dropdown-item" href="{% url 'tasks_history' %}">Aprobaciones</a></li>
+                                <li><a class="dropdown-item" href="{% url 'index' %}">Global operaciones</a></li>
+                                <li><a class="dropdown-item" href="{% url 'index' %}">Empleados</a></li>
+                                <li><a class="dropdown-item" href="{% url 'index' %}">Clientes</a></li>
+                                <li><a class="dropdown-item" href="{% url 'index' %}">Rechazos</a></li>
+                                <li><a class="dropdown-item" href="{% url 'index' %}">Aprobaciones</a></li>
                             </ul>
                         </li>     
 
                         <li class="nav-item">
-                            <a href="{% url 'create_task' %}" class="nav-link">Create</a>
+                            <a href="{% url 'index' %}" class="nav-link">Create</a>
                         </li>   
                     {% endif %}
                   
@@ -82,7 +82,7 @@
                     <!-- Sólo el perfil del cliente-->
                     {% if request.user|has_group:"customer" %} 
                         <li class="nav-item">
-                            <a href="{% url 'task_client_pending' %}" class="nav-link">Aceptación de vehículos</a>
+                            <a href="{% url 'index' %}" class="nav-link">Aceptación de vehículos</a>
                         </li>
                     {% endif %}
 
