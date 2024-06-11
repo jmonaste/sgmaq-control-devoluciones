@@ -11,4 +11,4 @@ run:
     port: 8000
   secrets:
     - name: DATABASE_SECRET
-      value-from: "arn:aws:secretsmanager:eu-west-3:891377100756:secret:controlapp/database/url-Wwr7m0"
+      value-from: "arn:aws:secretsmanager:eu-west-3:891377100756:secret:test/sgmaq/postgres/django-xGgQmy"

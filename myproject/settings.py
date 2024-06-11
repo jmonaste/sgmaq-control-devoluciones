@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import json
 import dj_database_url
+import os
 from os import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -86,7 +87,7 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 
 if "DATABASE_SECRET" in environ:
     database_secret = environ.get("DATABASE_SECRET")
-    db_url = json.loads(database_secret)["CONTROLAPP_DATABASE_URL"]
+    db_url = json.loads(database_secret)["DATABASE_URL"]
     DATABASES = {"default": dj_database_url.parse(db_url)}
 else:
     DATABASES = {"default": dj_database_url.parse("sqlite:///db.sqlite3")}
@@ -143,7 +144,7 @@ STORAGES = {
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 if "DATABASE_SECRET" in environ:
