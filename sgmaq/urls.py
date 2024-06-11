@@ -17,7 +17,9 @@ urlpatterns = [
 
     path('upload/', views.upload_file, name='upload_file'),
 
-    
+    path('task_delivery/<int:task_id>', views.task_delivery, name="task_delivery"),
+
+
 ]  
 
 

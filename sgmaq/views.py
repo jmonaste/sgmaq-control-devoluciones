@@ -20,8 +20,12 @@ from .models import MotivoRechazo
 from .models import Client
 from .models import CarBrand
 from .models import CarModel
+from .models import PostImage
 
 from .forms import UploadFileForm
+from .forms import EmployeeTaskForm
+from .forms import TaskUploadImage
+
 from datetime import datetime
 import pandas as pd
 from django.core.exceptions import ObjectDoesNotExist
@@ -234,3 +238,47 @@ def upload_file(request):
         return render(request, 'tasks/tasks_upload.html', {'form': form})
 
 
+@login_required
+def task_delivery(request, task_id):
+    history = ChangeLog.objects.filter(task_id=task_id).order_by('-dateofchange') # Obtener el historial filtrado por task_id
+
+    if history:
+        user_ids = [h.user_id for h in history]
+        users = User.objects.filter(pk__in=user_ids)
+        # Combinar historiales con usuarios
+        history = [(h, u) for h in history for u in users if u.pk == h.user_id]
+
+    if request.method == 'GET':
+        task = get_object_or_404(Task, pk=task_id, employee_user=request.user)
+        images = PostImage.objects.filter(task=task)
+        form = EmployeeTaskForm(instance=task)
+        imageForm = TaskUploadImage(instance=task)
+
+        return render(request, 'tasks/task_delivery.html', {
+            'task': task,
+            'form': form,
+            'history': history,
+            'imageForm': imageForm,
+            'images': images
+        })
+
+
+    else:
+        try:
+
+            task = get_object_or_404(Task, pk=task_id, employee_user=request.user)
+            field = request.POST.get('field')
+            value = request.POST.get('value') == 'true'
+            
+            if hasattr(task, field):
+                setattr(task, field, value)
+                task.save()
+                return redirect('tasks')
+            else:
+                return redirect('tasks')
+        except ValueError:
+                return render(request, 'tasks/task_delivery.html', {
+                    'task': task,
+                    'form': form,
+                    'error': "Error actualizando task"
+                })
