@@ -1,0 +1,72 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+
+<h1>Vehículos pendientes de validación y entrega</h1>
+
+<form action="{% url 'task_search' %}" method="get" class="mb-3">
+        {% csrf_token %}
+        <input type="text" name="q", placeholder="Introduzca VIN">
+        <button type="submit" class="btn btn-primary">Buscar [pdte]</button>
+
+</form>
+
+    {% for task in tasks %}
+
+        <div class="card mb-3">
+
+            <div class="card-header">
+                Campaña: {{ task.project.name }}
+            </div>
+            
+            <div class="card-body">
+                <div class="row">  
+                    <div class="col">  
+                        <h5 class="card-title">{{ task.vin }}</h5>
+                        <p class="card-text">Comentario cliente: {{ task.description }}</p>
+                        <p class="card-text mb-1 text-sm">Empleado: <strong>{{ task.employee_user }}</strong></p>
+                        <p class="card-text mb-1 text-sm">Responsable asignado: {{ task.responsible_user }}</p>
+                        <p class="card-text mb-1 text-sm">Fecha creación tarea: {{ task.created }}</p>
+                        <p class="card-text mb-1 text-sm">Fecha finalización tarea: {{ task.datecompleted }}</p>
+                        <p class="card-text mb-1 text-sm">Deadline: {{ task.deadline }}</p>
+                    </div>
+                    <div class="col">  
+                        <p class="card-text mb-1">Cliente: {{ task.client }}</p>
+                        <p class="card-text mb-1">Marca: {{ task.carbrand }}</p>
+                        <p class="card-text mb-1">Modelo: {{ task.carmodel }}</p>
+                    </div>
+
+                    <div class="col-auto">  
+
+                        <a href="{% url 'task_detail' task.id %}" class="btn btn-success">Detalle</a>
+
+                        
+                        <form method="POST" action="{% url 'task_manager_approval' task.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="task_id" value="{{ task.id }}">
+                            <button type="submit" class="btn btn-secondary">Entregar</button>
+                        </form>            
+                        
+                        <form method="GET" action="{% url 'task_manager_denial' task.id%}">
+                            {% csrf_token %}
+                            <input type="hidden" name="task_id" value="{{ task.id }}">
+                            <button type="submit" class="btn btn-danger">Devolver</button>
+                        </form>  
+                    </div>
+
+                    
+
+                </div>
+            </div>
+
+        </div>
+
+    {% endfor %}
+
+    <div class="col-auto">  
+        <a href="" class="btn btn-warning">Entregar todo</a>
+    </div>
+
+
+
+{% endblock %}

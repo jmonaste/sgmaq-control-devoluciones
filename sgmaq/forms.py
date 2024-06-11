@@ -20,3 +20,22 @@ class TaskUploadImage(forms.ModelForm):
     class Meta:
         model = Task
         fields = ['carimage']
+
+# Formulario para usar el modelo de imagen del post
+class PostImageForm(forms.ModelForm):
+    class Meta:
+        model = PostImage
+        fields = ['images']
+
+
+class TaskDeliveryClientForm(forms.ModelForm):
+  task_id = forms.IntegerField(widget=forms.HiddenInput())
+  class Meta:
+    model = Task
+    fields = ['task_id']
+
+
+class TaskFormRechazoManager(forms.ModelForm):
+    class Meta:
+        model = Task
+        fields = ['motivo_rechazo_manager', 'comentario_rechazo_manager']

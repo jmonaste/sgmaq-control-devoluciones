@@ -14,10 +14,17 @@ urlpatterns = [
 
     path('tasks/', views.tasks, name="tasks"),
     path('tasks/task_search', views.task_search, name="task_search"),
+    path('task_detail/<int:task_id>', views.task_detail, name="task_detail"),
 
     path('upload/', views.upload_file, name='upload_file'),
 
     path('task_delivery/<int:task_id>', views.task_delivery, name="task_delivery"),
+    path('tasks/<int:task_id>/complete', views.complete_task, name="complete_task"),
+    path('upload_image/<int:task_id>/', views.upload_image, name='upload_image'),
+
+    path('task_manager_pending/', views.task_manager_pending, name="task_manager_pending"),
+    path('task_manager_approval/<int:task_id>', views.task_manager_approval, name="task_manager_approval"), 
+    path('task_manager_denial/<int:task_id>/', views.task_manager_denial, name="task_manager_denial"),  
 
 
 ]  

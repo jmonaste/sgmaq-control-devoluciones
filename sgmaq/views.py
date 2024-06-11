@@ -11,6 +11,7 @@ from django.db.models import Q  # Import the Q object
 from django.db.models import Count, Prefetch
 from django.db import connection
 from .decorators import unauthenticated_user, allowed_user
+
 from .models import Task
 from .models import MotivoRechazo
 from .models import Project
@@ -25,6 +26,9 @@ from .models import PostImage
 from .forms import UploadFileForm
 from .forms import EmployeeTaskForm
 from .forms import TaskUploadImage
+from .forms import PostImageForm
+from .forms import TaskDeliveryClientForm
+from .forms import TaskFormRechazoManager
 
 from datetime import datetime
 import pandas as pd
@@ -237,7 +241,6 @@ def upload_file(request):
         form = UploadFileForm()
         return render(request, 'tasks/tasks_upload.html', {'form': form})
 
-
 @login_required
 def task_delivery(request, task_id):
     history = ChangeLog.objects.filter(task_id=task_id).order_by('-dateofchange') # Obtener el historial filtrado por task_id
@@ -282,3 +285,156 @@ def task_delivery(request, task_id):
                     'form': form,
                     'error': "Error actualizando task"
                 })
+        
+@login_required    
+def complete_task(request, task_id):
+    # meter try
+    if request.method == 'POST':
+        task = get_object_or_404(Task, pk=task_id, employee_user=request.user)
+        form = EmployeeTaskForm(request.POST, instance=task)
+        task.save()
+
+        # Validation - para entregar, los checks deben estar marcados todos
+        if all([task.windows, task.chassis, task.wheels, task.upholstery]):
+            task.datecompleted = timezone.now()
+            task.flag_rechazado = False
+            task.save()
+
+            # Create changelog entry
+            ChangeLog.objects.create(
+                task_id=task_id,
+                dateofchange = timezone.now(),
+                user_id=request.user.id,
+                descripcion_estado = "Tarea completada",
+                changereason="Tarea completada",
+                comment="Entrada automática",
+        
+            )
+
+            return redirect('tasks')
+        
+        return render(request, 'tasks/task_delivery.html', {
+            'task': task,
+            'form': form,
+            'error': "Error - Antes de entregar debe completar todas las tareas"
+            })
+
+@login_required       
+def upload_image(request, task_id):
+    if request.method == 'POST':
+        task = Task.objects.get(pk=task_id)
+        images = request.FILES.getlist('images')  # Nombre del campo en el formulario
+        
+        if not images:
+            return JsonResponse({'status': 'error', 'message': 'No images uploaded'})
+
+        errors = []
+        for image in images:
+            image_form = PostImageForm({'task': task.id}, {'images': image})
+            if image_form.is_valid():
+                post_image = image_form.save(commit=False)
+                post_image.task = task
+                post_image.save()
+            else:
+                errors.append(image_form.errors)
+        
+        if errors:
+            return JsonResponse({'status': 'error', 'errors': errors})
+        
+        return JsonResponse({'status': 'success', 'message': 'Images uploaded successfully'})
+    
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'})
+
+@login_required
+@allowed_user(allowed_roles=['admin', 'manager'])
+def task_manager_pending(request):
+    # Mostrar todas las tareas entregadas por employee, independientemente del usuario
+    tasks = Task.objects.filter(datecompleted__isnull=False, datecompleted_manager_approval__isnull=True).order_by('-datecompleted')
+    return render(request, 'tasks/task_manager_pending.html', {
+        'tasks': tasks
+    })
+
+@login_required
+def task_manager_approval(request, task_id):
+    task = get_object_or_404(Task, pk=task_id)
+    if request.method == 'POST':
+        try:
+            form = TaskDeliveryClientForm(request.POST)
+            if form.is_valid():
+                task.datecompleted_manager_approval = timezone.now()
+                task.save()
+                # Create changelog entry
+                ChangeLog.objects.create(
+                    task_id=task_id,
+                    dateofchange = timezone.now(),
+                    user_id=request.user.id,
+                    descripcion_estado = "Tarea Aprobada por manager",
+                    changereason= "Tarea Aprobada por manager",
+                    comment="Entrada automática",
+                )                
+            return redirect('task_manager_pending')
+        except ValueError:
+                return redirect('task_manager_pending')
+
+@login_required
+@allowed_user(allowed_roles=['admin', 'manager'])
+def task_manager_denial(request, task_id):
+    task = get_object_or_404(Task, pk=task_id)
+    if request.method == 'GET':
+        print('task_manager_denial - get')
+        return render(request, 'tasks/task_manager_denial.html', {
+            'task': task,
+            'form': TaskFormRechazoManager
+        })
+    else:
+        print('task_manager_denial - post')
+        try:
+            form = TaskFormRechazoManager(request.POST)
+            if form.is_valid():
+                task.datecompleted = None
+                task.datecompleted_manager_approval = None
+                task.datecompleted_client_approval = None
+                task.motivo_rechazo_manager = form.cleaned_data['motivo_rechazo_manager']
+                task.comentario_rechazo_manager = form.cleaned_data['comentario_rechazo_manager']
+                task.flag_rechazado = True
+                task.save()
+                # Create changelog entry
+                ChangeLog.objects.create(
+                    task_id=task_id,
+                    dateofchange = timezone.now(),
+                    user_id=request.user.id,
+                    descripcion_estado = "Tarea Rechazada por manager",
+                    changereason= MotivoRechazo.objects.get(codigo=task.motivo_rechazo_manager).descripcion,
+                    comment=task.comentario_rechazo_manager,
+                )
+            return redirect('task_manager_pending')
+        except ValueError:
+            return redirect('task_manager_pending')
+
+@login_required
+def task_detail(request, task_id):
+    if request.method == 'GET':
+        history = ChangeLog.objects.filter(task_id=task_id).order_by('-dateofchange') # Obtener el historial filtrado por task_id
+
+        if history:
+            user_ids = [h.user_id for h in history]
+            users = User.objects.filter(pk__in=user_ids)
+            # Combinar historiales con usuarios
+            history = [(h, u) for h in history for u in users if u.pk == h.user_id]
+
+        task = get_object_or_404(Task, pk=task_id)
+        form = EmployeeTaskForm(instance=task)
+        imageForm = TaskUploadImage(instance=task)
+        return render(request, 'tasks/task_detail.html', {
+            'task': task,
+            'form': form,
+            'history': history,
+            'imageForm': imageForm
+        })
+
+
+
+
+
+
+
