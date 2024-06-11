@@ -193,7 +193,7 @@ def upload_file(request):
 
                     # Consulta SQL para insertar los datos
                     sql_query = """
-                        INSERT INTO myapp_task (
+                        INSERT INTO sgmaq_task (
                             vin, project_id, client_id, carbrand_id, carmodel_id, comment, created,
                             deadline, employee_user_id, responsible_user_id, priority, description, important, deniedbyclient, windows, chassis, wheels, upholstery, flag_rechazado
                         ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)

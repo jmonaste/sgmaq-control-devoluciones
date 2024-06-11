@@ -88,7 +88,7 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 
 if "DATABASE_SECRET" in environ:
     database_secret = environ.get("DATABASE_SECRET")
-    db_url = json.loads(database_secret)["DATABASE_URL"]
+    db_url = json.loads(database_secret)["CONTROLAPP_DATABASE_URL"]
     DATABASES = {"default": dj_database_url.parse(db_url)}
 else:
     DATABASES = {"default": dj_database_url.parse("sqlite:///db.sqlite3")}
