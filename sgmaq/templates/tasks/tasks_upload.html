@@ -1,0 +1,56 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Subir archivo Excel</h2>
+    <form id="uploadForm" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Subir</button>
+    </form>
+
+    <div id="results" class="mt-3"></div>
+
+    {% if messages %}
+        <ul class="list-unstyled mt-3">
+            {% for message in messages %}
+                <li class="alert alert-{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#uploadForm').on('submit', function(event) {
+            event.preventDefault();
+            var formData = new FormData(this);
+
+            $.ajax({
+                url: "{% url 'upload_file' %}",
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    $('#results').empty();
+                    if (response.results) {
+                        response.results.forEach(function(result) {
+                            var alertClass = result.status === 'success' ? 'alert-success' : 'alert-danger';
+                            var div = $('<div class="alert ' + alertClass + '"></div>');
+                            div.text(result.message);
+                            $('#results').append(div);
+                        });
+                    } else {
+                        $('#results').append('<div class="alert alert-danger">Error: ' + response.error + '</div>');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $('#results').append('<div class="alert alert-danger">Error: ' + xhr.responseText + '</div>');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

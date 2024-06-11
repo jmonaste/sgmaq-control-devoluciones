@@ -14,6 +14,10 @@ urlpatterns = [
 
     path('tasks/', views.tasks, name="tasks"),
     path('tasks/task_search', views.task_search, name="task_search"),
+
+    path('upload/', views.upload_file, name='upload_file'),
+
+    
 ]  
 
 
